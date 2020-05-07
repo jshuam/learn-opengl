@@ -50,8 +50,8 @@ glm::vec3 cubePositions[] = { glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.
                               glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
                               glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f) };
 
-constexpr int windowWidth = 800;
-constexpr int windowHeight = 600;
+constexpr int windowWidth = 1280;
+constexpr int windowHeight = 720;
 
 constexpr unsigned int numModels = 2;
 constexpr unsigned int numShaders = 1;
@@ -261,7 +261,7 @@ int main(void)
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 0.1f, 100.0f);
 
         unsigned int viewLoc = glGetUniformLocation(shaderPrograms[0].id, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
