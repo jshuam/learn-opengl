@@ -52,8 +52,9 @@ void setupScene()
 {
     g_objectShader.loadShaders("colors.vs", "colors.fs");
     g_objectShader.use();
-    g_objectShader.setVec3("objectColor", glm::vec3(1.0f, 0.39f, 0.28f));
+    g_objectShader.setVec3("objectColor", glm::vec3(0.45f, 1.0f, 0.69f));
     g_objectShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    g_objectShader.setVec3("lightPos", lightPos);
 
     g_lightShader.loadShaders("light.vs", "light.fs");
 
