@@ -28,14 +28,13 @@ const char* fragmentShaderSource2 = "#version 330 core\n"
 
 float vertices[] = { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f };
 
-float rectVertices[] = { 0.5f,  0.5f,  0.0f, 0.5f,  -0.5f, 0.0f,
-                         -0.5f, -0.5f, 0.0f, -0.5f, 0.5f,  0.0f };
+float rectVertices[] = { 0.5f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f, -0.5f, 0.5f, 0.0f };
 
 unsigned int indices[] = { 0, 1, 3, 1, 2, 3 };
 
 unsigned int VAO[2];
-bool         drawTriangle  = true;
-bool         wireframeMode = false;
+bool drawTriangle  = true;
+bool wireframeMode = false;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -84,6 +83,10 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "Hello Window", NULL, NULL);
     if (window == NULL)
@@ -172,7 +175,7 @@ unsigned int createShaderProgram(const char* vertexSource, const char* fragmentS
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
-    int  success;
+    int success;
     char infoLog[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 

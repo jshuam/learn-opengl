@@ -1,10 +1,10 @@
-#version 330 core 
+#version 330 core
 
-out vec4 FragColor; 
+out vec4 FragColor;
 
-uniform vec4 ourColor; 
+uniform vec4 ourColor;
 
-void main() 
-{ 
-	FragColor = ourColor; 
-};
+void main()
+{
+    FragColor = ourColor;
+}

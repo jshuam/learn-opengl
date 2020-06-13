@@ -31,4 +31,4 @@ void main()
     TexCoords = aTexCoords;
 
     gl_Position = projection * vec4(FragPos, 1.0);
-};
+}

@@ -50,11 +50,11 @@ glm::vec3 cubePositions[] = { glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.
                               glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
                               glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f) };
 
-constexpr int windowWidth = 800;
+constexpr int windowWidth  = 800;
 constexpr int windowHeight = 600;
 
-constexpr unsigned int numModels = 2;
-constexpr unsigned int numShaders = 1;
+constexpr unsigned int numModels   = 2;
+constexpr unsigned int numShaders  = 1;
 constexpr unsigned int numTextures = 2;
 
 unsigned int VAOs[numModels];
@@ -72,8 +72,8 @@ void drawBox();
 void drawCube();
 void drawCubes();
 
-float fov = 45.0f;
-float aWidth = windowWidth;
+float fov     = 45.0f;
+float aWidth  = windowWidth;
 float aHeight = windowHeight;
 glm::vec3 viewPos(0.0f, 0.0f, -3.0f);
 
@@ -181,6 +181,10 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
     GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Hello Window", NULL, NULL);
     if (window == NULL)
     {
@@ -225,7 +229,7 @@ int main(void)
         drawFunc();
 
         glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, viewPos);
+        view           = glm::translate(view, viewPos);
 
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(fov), aWidth / aHeight, 0.1f, 100.0f);
@@ -258,7 +262,7 @@ void drawBox()
     shaderPrograms[0].use();
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model           = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     unsigned int modelLoc = glGetUniformLocation(shaderPrograms[0].id, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -278,7 +282,7 @@ void drawCube()
     shaderPrograms[0].use();
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+    model           = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
     unsigned int modelLoc = glGetUniformLocation(shaderPrograms[0].id, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -295,8 +299,8 @@ void drawCubes()
     for (int i = 0; i < 10; ++i)
     {
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, cubePositions[i]);
-        float angle = 20.0f * i;
+        model           = glm::translate(model, cubePositions[i]);
+        float angle     = 20.0f * i;
 
         if (i % 3 == 0)
         {

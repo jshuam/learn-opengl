@@ -6,5 +6,5 @@ out vec3 fragment;
 
 void main()
 {
-	fragment = vColor;
+    fragment = vColor;
 }

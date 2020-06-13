@@ -26,8 +26,8 @@ unsigned int indices[] = {
     1, 2, 3  // second triangle
 };
 
-constexpr unsigned int numModels = 3;
-constexpr unsigned int numShaders = 2;
+constexpr unsigned int numModels   = 3;
+constexpr unsigned int numShaders  = 2;
 constexpr unsigned int numTextures = 2;
 
 unsigned int VAOs[numModels];
@@ -80,6 +80,10 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "Hello Window", NULL, NULL);
     if (window == NULL)
@@ -139,8 +143,8 @@ void drawTexturedContainer()
     shaderPrograms[0].use();
 
     glm::mat4 trans = glm::mat4(1.0f);
-    trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-    trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+    trans           = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+    trans           = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
 
     unsigned int transformLoc = glGetUniformLocation(shaderPrograms[0].id, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
@@ -172,8 +176,8 @@ void draw2Textures()
     shaderPrograms[0].use();
 
     glm::mat4 trans = glm::mat4(1.0f);
-    trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-    trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+    trans           = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+    trans           = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
 
     unsigned int transformLoc = glGetUniformLocation(shaderPrograms[0].id, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
