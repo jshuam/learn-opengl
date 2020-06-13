@@ -93,8 +93,8 @@ void renderScene()
 
     g_objectShader.use();
 
-    g_objectShader.setVec3("light.ambient", diffuse);
-    g_objectShader.setVec3("light.diffuse", ambient);
+    g_objectShader.setVec3("light.ambient", ambient);
+    g_objectShader.setVec3("light.diffuse", diffuse);
 
     g_objectShader.setMat4("model", coralCube->modelMat);
     g_objectShader.setMat4("view", g_camera.view());
