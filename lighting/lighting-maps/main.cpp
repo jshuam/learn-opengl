@@ -25,6 +25,7 @@ float g_aspectRatio  = g_windowWidth / g_windowHeight;
 
 GLuint g_containerMap;
 GLuint g_containerSpecMap;
+GLuint g_containerEmission;
 TexturedCube* g_crate;
 
 Cube* g_light;
@@ -69,6 +70,7 @@ void setupScene()
 
     g_lightingMapShader.setInt("material.diffuse", 0);
     g_lightingMapShader.setInt("material.specular", 1);
+    g_lightingMapShader.setInt("material.emission", 2);
     g_lightingMapShader.setFloat("material.shininess", 64.0f);
 
     g_lightingMapShader.setVec3("light.position", lightPosition);
@@ -114,6 +116,25 @@ void setupScene()
     }
     stbi_image_free(data);
 
+    glGenTextures(1, &g_containerEmission);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, g_containerEmission);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_set_flip_vertically_on_load_thread(true);
+    data = stbi_load("matrix.jpg", &width, &height, &numChannels, 0);
+
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    stbi_image_free(data);
+
     g_crate           = new TexturedCube();
     g_crate->modelMat = glm::mat4(1.0f);
     g_lightingMapShader.setMat4("model", g_crate->modelMat);
@@ -135,10 +156,16 @@ void renderScene()
 
     g_lightingMapShader.setMat4("view", g_camera.view());
     g_lightingMapShader.setMat4("projection", g_camera.projection(g_aspectRatio));
-    g_lightingMapShader.setVec3("viewPos", g_camera.m_cameraPos);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, g_containerMap);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, g_containerSpecMap);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, g_containerEmission);
+
     g_crate->draw();
 
     g_lightShader.use();
