@@ -35,6 +35,7 @@ glm::vec3 cubePositions[] = { glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.
                               glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f) };
 
 Shader g_dirLightShader;
+Shader g_pointLightShader;
 
 Camera g_camera;
 
@@ -78,6 +79,23 @@ void setupScene()
     g_dirLightShader.setVec3("light.ambient", glm::vec3(0.15f));
     g_dirLightShader.setVec3("light.diffuse", glm::vec3(0.85f));
     g_dirLightShader.setVec3("light.specular", glm::vec3(1.0f));
+
+    g_pointLightShader.loadShaders("point.vs", "point.fs");
+    g_pointLightShader.use();
+
+    g_pointLightShader.setInt("material.diffuse", 0);
+    g_pointLightShader.setInt("material.specular", 1);
+    g_pointLightShader.setInt("material.emission", 2);
+    g_pointLightShader.setFloat("material.shininess", 64.0f);
+
+    g_pointLightShader.setVec3("light.position", glm::vec3(0.0f, 0.0f, -5.0f));
+    g_pointLightShader.setVec3("light.ambient", glm::vec3(0.15f));
+    g_pointLightShader.setVec3("light.diffuse", glm::vec3(0.85f));
+    g_pointLightShader.setVec3("light.specular", glm::vec3(1.0f));
+
+    g_pointLightShader.setFloat("light.constant", 1.0f);
+    g_pointLightShader.setFloat("light.linear", 0.09f);
+    g_pointLightShader.setFloat("light.quadratic", 0.032f);
 
     glGenTextures(1, &g_containerMap);
     glBindTexture(GL_TEXTURE_2D, g_containerMap);
@@ -143,10 +161,15 @@ void setupScene()
 
 void renderScene()
 {
-    g_dirLightShader.use();
+    // g_dirLightShader.use();
 
-    g_dirLightShader.setMat4("view", g_camera.view());
-    g_dirLightShader.setMat4("projection", g_camera.projection(g_aspectRatio));
+    // g_dirLightShader.setMat4("view", g_camera.view());
+    // g_dirLightShader.setMat4("projection", g_camera.projection(g_aspectRatio));
+
+    g_pointLightShader.use();
+
+    g_pointLightShader.setMat4("view", g_camera.view());
+    g_pointLightShader.setMat4("projection", g_camera.projection(g_aspectRatio));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, g_containerMap);
@@ -160,7 +183,9 @@ void renderScene()
         model           = glm::translate(model, cubePositions[i]);
         float angle     = 20.0f * i;
         model           = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        g_dirLightShader.setMat4("model", model);
+        // g_dirLightShader.setMat4("model", model);
+
+        g_pointLightShader.setMat4("model", model);
 
         g_crate->draw();
     }
