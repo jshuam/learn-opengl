@@ -27,6 +27,7 @@ GLuint g_containerMap;
 GLuint g_containerSpecMap;
 GLuint g_containerEmission;
 TexturedCube* g_crate;
+Cube* g_light;
 
 glm::vec3 cubePositions[] = { glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
                               glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -34,8 +35,11 @@ glm::vec3 cubePositions[] = { glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.
                               glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
                               glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f) };
 
+Shader g_lightShader;
 Shader g_dirLightShader;
 Shader g_pointLightShader;
+
+std::function<void()> renderScene;
 
 Camera g_camera;
 
@@ -58,11 +62,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     g_camera.zoom(yoffset);
-}
-
-void processInput(GLFWwindow* window)
-{
-    g_camera.move(window, deltaTime);
 }
 
 void setupScene()
@@ -88,14 +87,15 @@ void setupScene()
     g_pointLightShader.setInt("material.emission", 2);
     g_pointLightShader.setFloat("material.shininess", 64.0f);
 
-    g_pointLightShader.setVec3("light.position", glm::vec3(0.0f, 0.0f, -5.0f));
+    glm::vec3 lightPosition(0.0f, 0.0f, -5.0f);
+    g_pointLightShader.setVec3("light.position", lightPosition);
     g_pointLightShader.setVec3("light.ambient", glm::vec3(0.15f));
     g_pointLightShader.setVec3("light.diffuse", glm::vec3(0.85f));
     g_pointLightShader.setVec3("light.specular", glm::vec3(1.0f));
 
     g_pointLightShader.setFloat("light.constant", 1.0f);
-    g_pointLightShader.setFloat("light.linear", 0.09f);
-    g_pointLightShader.setFloat("light.quadratic", 0.032f);
+    g_pointLightShader.setFloat("light.linear", 0.045f);
+    g_pointLightShader.setFloat("light.quadratic", 0.0075f);
 
     glGenTextures(1, &g_containerMap);
     glBindTexture(GL_TEXTURE_2D, g_containerMap);
@@ -135,37 +135,45 @@ void setupScene()
     }
     stbi_image_free(data);
 
-    glGenTextures(1, &g_containerEmission);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, g_containerEmission);
+    g_crate = new TexturedCube();
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    g_light           = new Cube();
+    g_light->modelMat = glm::translate(lightPosition);
+    g_light->modelMat = glm::scale(g_light->modelMat, glm::vec3(0.25f));
 
-    stbi_set_flip_vertically_on_load_thread(true);
-    data = stbi_load("matrix.jpg", &width, &height, &numChannels, 0);
-
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    stbi_image_free(data);
-
-    g_crate           = new TexturedCube();
-    g_crate->modelMat = glm::mat4(1.0f);
-    g_dirLightShader.setMat4("model", g_crate->modelMat);
+    g_lightShader.loadShaders("light.vs", "light.fs");
+    g_lightShader.use();
+    g_lightShader.setMat4("model", g_light->modelMat);
+    g_lightShader.setVec3("color", glm::vec3(1.0f));
 }
 
-void renderScene()
+void renderDirLight()
 {
-    // g_dirLightShader.use();
+    g_dirLightShader.use();
 
-    // g_dirLightShader.setMat4("view", g_camera.view());
-    // g_dirLightShader.setMat4("projection", g_camera.projection(g_aspectRatio));
+    g_dirLightShader.setMat4("view", g_camera.view());
+    g_dirLightShader.setMat4("projection", g_camera.projection(g_aspectRatio));
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, g_containerMap);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, g_containerSpecMap);
+
+    for (unsigned int i = 0; i < 10; ++i)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model           = glm::translate(model, cubePositions[i]);
+        float angle     = 20.0f * i;
+        model           = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        g_dirLightShader.setMat4("model", model);
+
+        g_crate->draw();
+    }
+}
+
+void renderPointLight()
+{
     g_pointLightShader.use();
 
     g_pointLightShader.setMat4("view", g_camera.view());
@@ -183,11 +191,31 @@ void renderScene()
         model           = glm::translate(model, cubePositions[i]);
         float angle     = 20.0f * i;
         model           = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        // g_dirLightShader.setMat4("model", model);
 
         g_pointLightShader.setMat4("model", model);
 
         g_crate->draw();
+    }
+
+    g_lightShader.use();
+
+    g_lightShader.setMat4("view", g_camera.view());
+    g_lightShader.setMat4("projection", g_camera.projection(g_aspectRatio));
+
+    g_light->draw();
+}
+
+void processInput(GLFWwindow* window)
+{
+    g_camera.move(window, deltaTime);
+
+    if (glfwGetKey(window, GLFW_KEY_1))
+    {
+        renderScene = renderDirLight;
+    }
+    if (glfwGetKey(window, GLFW_KEY_2))
+    {
+        renderScene = renderPointLight;
     }
 }
 
@@ -235,6 +263,8 @@ int main(void)
 
     setupScene();
 
+    renderScene = renderDirLight;
+
     float currentFrameTime;
     float lastFrameTime = 0;
 
@@ -255,6 +285,7 @@ int main(void)
     }
 
     delete g_crate;
+    delete g_light;
 
     glfwTerminate();
 
