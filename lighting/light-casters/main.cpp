@@ -38,6 +38,7 @@ glm::vec3 cubePositions[] = { glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.
 Shader g_lightShader;
 Shader g_dirLightShader;
 Shader g_pointLightShader;
+Shader g_spotlightShader;
 
 std::function<void()> renderScene;
 
@@ -96,6 +97,22 @@ void setupScene()
     g_pointLightShader.setFloat("light.constant", 1.0f);
     g_pointLightShader.setFloat("light.linear", 0.045f);
     g_pointLightShader.setFloat("light.quadratic", 0.0075f);
+
+    g_spotlightShader.loadShaders("spotlight.vs", "spotlight.fs");
+    g_spotlightShader.use();
+
+    g_spotlightShader.setInt("material.diffuse", 0);
+    g_spotlightShader.setInt("material.specular", 1);
+    g_spotlightShader.setInt("material.emission", 2);
+    g_spotlightShader.setFloat("material.shininess", 64.0f);
+
+    g_spotlightShader.setVec3("light.ambient", glm::vec3(0.15f));
+    g_spotlightShader.setVec3("light.diffuse", glm::vec3(0.85f));
+    g_spotlightShader.setVec3("light.specular", glm::vec3(1.0f));
+
+    g_spotlightShader.setFloat("light.constant", 1.0f);
+    g_spotlightShader.setFloat("light.linear", 0.045f);
+    g_spotlightShader.setFloat("light.quadratic", 0.0075f);
 
     glGenTextures(1, &g_containerMap);
     glBindTexture(GL_TEXTURE_2D, g_containerMap);
@@ -205,6 +222,35 @@ void renderPointLight()
     g_light->draw();
 }
 
+void renderSpotlight()
+{
+    g_spotlightShader.use();
+
+    g_spotlightShader.setMat4("view", g_camera.view());
+    g_spotlightShader.setMat4("projection", g_camera.projection(g_aspectRatio));
+    g_spotlightShader.setVec3("light.position", g_camera.m_cameraPos);
+    g_spotlightShader.setVec3("light.direction", g_camera.m_cameraFront);
+    g_spotlightShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, g_containerMap);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, g_containerSpecMap);
+
+    for (unsigned int i = 0; i < 10; ++i)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model           = glm::translate(model, cubePositions[i]);
+        float angle     = 20.0f * i;
+        model           = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+        g_spotlightShader.setMat4("model", model);
+
+        g_crate->draw();
+    }
+}
+
 void processInput(GLFWwindow* window)
 {
     g_camera.move(window, deltaTime);
@@ -216,6 +262,10 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_2))
     {
         renderScene = renderPointLight;
+    }
+    if (glfwGetKey(window, GLFW_KEY_3))
+    {
+        renderScene = renderSpotlight;
     }
 }
 

@@ -72,7 +72,7 @@ class Shader
         if (!success)
         {
             glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-            std::cerr << "Failed to compile vertex shader\n" << infoLog << std::endl;
+            std::cerr << "Failed to compile vertex shader: " << vertexPath << "\n" << infoLog << std::endl;
         }
 
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -83,7 +83,7 @@ class Shader
         if (!success)
         {
             glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-            std::cerr << "Failed to compile fragment shader\n" << infoLog << std::endl;
+            std::cerr << "Failed to compile fragment shader: " << fragmentPath << "\n" << infoLog << std::endl;
         }
 
         id = glCreateProgram();

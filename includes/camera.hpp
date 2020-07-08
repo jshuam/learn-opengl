@@ -17,9 +17,9 @@ class Camera
   public:
     float m_speed;
     glm::vec3 m_cameraPos;
+    glm::vec3 m_cameraFront;
 
   private:
-    glm::vec3 m_cameraFront;
     glm::vec3 m_cameraUp;
 
     float m_near;
